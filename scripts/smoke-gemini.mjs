@@ -203,6 +203,9 @@ function explainError(err) {
   if (/RESOURCE_EXHAUSTED|429|quota/i.test(msg) || status === 429) {
     return `Quota/rate limit hit. Wait and retry, or check quota at https://aistudio.google.com/apikey.\n  Raw error: ${msg}`;
   }
+  if (/UNAVAILABLE|503|high demand/i.test(msg) || status === 503) {
+    return `Model temporarily overloaded (transient, not a config problem). Wait a few seconds and rerun.\n  Raw error: ${msg}`;
+  }
   return `Unexpected error: ${msg}`;
 }
 
