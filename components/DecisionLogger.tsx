@@ -1,10 +1,28 @@
-// STUB — being replaced by user, do not expand
 "use client";
 
 import { useState } from "react";
 import type { Decision, DecisionLoggerProps } from "@/lib/types";
 
-const DECISIONS: Decision[] = ["comply", "partial", "defect"];
+const DECISION_CONFIG: Record<
+  Decision,
+  { label: string; description: string; color: string }
+> = {
+  comply: {
+    label: "Complied",
+    description: "Followed the intervention completely",
+    color: "green",
+  },
+  partial: {
+    label: "Partial",
+    description: "Some adherence, but not fully",
+    color: "amber",
+  },
+  defect: {
+    label: "Defected",
+    description: "Didn't follow the intervention",
+    color: "red",
+  },
+};
 
 export default function DecisionLogger({ onLog, disabled }: DecisionLoggerProps) {
   const [decision, setDecision] = useState<Decision | null>(null);
@@ -25,39 +43,72 @@ export default function DecisionLogger({ onLog, disabled }: DecisionLoggerProps)
     }
   }
 
+  const getButtonClass = (d: Decision) => {
+    const config = DECISION_CONFIG[d];
+    const isSelected = decision === d;
+    const baseClass = "flex-1 p-4 rounded-lg border-2 transition-all text-left";
+    
+    if (config.color === "green") {
+      return `${baseClass} ${
+        isSelected
+          ? "bg-green-100 border-green-600 text-green-900"
+          : "border-green-300 hover:border-green-500 hover:bg-green-50"
+      }`;
+    }
+    if (config.color === "amber") {
+      return `${baseClass} ${
+        isSelected
+          ? "bg-amber-100 border-amber-600 text-amber-900"
+          : "border-amber-300 hover:border-amber-500 hover:bg-amber-50"
+      }`;
+    }
+    // red
+    return `${baseClass} ${
+      isSelected
+        ? "bg-red-100 border-red-600 text-red-900"
+        : "border-red-300 hover:border-red-500 hover:bg-red-50"
+    }`;
+  };
+
   return (
-    <div className="flex flex-col gap-2 border border-dashed border-zinc-500 p-4">
-      <p className="text-xs text-zinc-500">DecisionLogger stub</p>
-      <div className="flex gap-2">
-        {DECISIONS.map((d) => (
-          <button
-            key={d}
-            type="button"
-            disabled={disabled || saving}
-            onClick={() => setDecision(d)}
-            className={`px-3 py-1 border ${
-              decision === d ? "bg-zinc-800 text-white" : "bg-transparent"
-            }`}
-          >
-            {d}
-          </button>
-        ))}
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-3 gap-3">
+        {(Object.keys(DECISION_CONFIG) as Decision[]).map((d) => {
+          const config = DECISION_CONFIG[d];
+          return (
+            <button
+              key={d}
+              type="button"
+              disabled={disabled || saving}
+              onClick={() => setDecision(d)}
+              className={getButtonClass(d)}
+            >
+              <div className="font-semibold text-sm">{config.label}</div>
+              <div className="text-xs mt-1 opacity-75">{config.description}</div>
+            </button>
+          );
+        })}
       </div>
+
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
         disabled={disabled || saving}
-        placeholder="note (optional)"
-        className="border p-2 text-sm"
+        placeholder="What actually happened? How do you feel? (optional)"
+        className="w-full p-3 border border-zinc-300 rounded-lg text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
       />
-      {error && <p className="text-sm text-red-500">{error}</p>}
+
+      {error && (
+        <p className="text-sm text-red-600 font-medium">{error}</p>
+      )}
+
       <button
         type="button"
         onClick={handleCommit}
         disabled={!decision || disabled || saving}
-        className="self-start px-4 py-2 bg-blue-600 text-white disabled:opacity-50"
+        className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {saving ? "Saving..." : "Commit decision"}
+        {saving ? "Saving..." : "Log decision"}
       </button>
     </div>
   );
