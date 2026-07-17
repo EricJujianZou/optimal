@@ -1,7 +1,7 @@
 // NOTE: "gemini-2.5-flash" 404s ("no longer available to new users") on
 // freshly-provisioned API keys as of 2026-07. Verified live against the
 // v1beta REST endpoint: gemini-2.5-flash -> 404, gemini-flash-latest -> 200.
-export const GEMINI_REASONING_MODEL = "gemini-flash-latest";
+export const GEMINI_REASONING_MODEL = "gemini-3-flash-preview";
 // Used when the primary model returns a transient 503/429 (capacity spikes).
 // Verified live: gemini-2.5-flash-lite 404s on this key ("no longer available
 // to new users") even though ListModels returns it; gemini-flash-lite-latest
