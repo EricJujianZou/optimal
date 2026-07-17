@@ -2,6 +2,11 @@
 // freshly-provisioned API keys as of 2026-07. Verified live against the
 // v1beta REST endpoint: gemini-2.5-flash -> 404, gemini-flash-latest -> 200.
 export const GEMINI_REASONING_MODEL = "gemini-flash-latest";
+// Used when the primary model returns a transient 503/429 (capacity spikes).
+// Verified live: gemini-2.5-flash-lite 404s on this key ("no longer available
+// to new users") even though ListModels returns it; gemini-flash-lite-latest
+// and gemini-3-flash-preview both return 200.
+export const GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest";
 export const GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts";
 
 // Prebuilt Gemini TTS voice. See:

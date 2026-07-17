@@ -1,5 +1,6 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import {
+  GEMINI_FALLBACK_MODEL,
   GEMINI_REASONING_MODEL,
   GEMINI_TTS_MODEL,
   TTS_BITS_PER_SAMPLE,
@@ -30,6 +31,40 @@ function getClient(): GoogleGenAI {
   return client;
 }
 
+/** Capacity/rate errors worth retrying or falling back on; anything else rethrows immediately. */
+function isTransientError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /\b(503|429|500)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|INTERNAL|overloaded|high demand/i.test(msg);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Runs `fn` against each model in order, retrying each once (800ms backoff)
+ * on transient capacity errors before moving to the next model.
+ */
+async function withModelFallback<T>(
+  models: string[],
+  fn: (model: string) => Promise<T>
+): Promise<T> {
+  let lastError: unknown;
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        return await fn(model);
+      } catch (err) {
+        if (!isTransientError(err)) throw err;
+        lastError = err;
+        console.warn(`Transient Gemini error on ${model} (attempt ${attempt + 1}):`, err);
+        if (attempt === 0) await sleep(800);
+      }
+    }
+  }
+  throw lastError;
+}
+
 /**
  * Sends the user's push-to-talk audio plus check-in context to Gemini and
  * gets back structured JSON: transcript, extracted variables, reasoning
@@ -47,8 +82,10 @@ export async function intervene(
     .filter(Boolean)
     .join("\n\n");
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_REASONING_MODEL,
+  const response = await withModelFallback(
+    [GEMINI_REASONING_MODEL, GEMINI_FALLBACK_MODEL],
+    (model) => ai.models.generateContent({
+    model,
     contents: [
       {
         role: "user",
@@ -63,7 +100,8 @@ export async function intervene(
       responseMimeType: "application/json",
       responseSchema: interveneResponseSchema,
     },
-  });
+  })
+  );
 
   const raw = response.text;
   if (!raw) {
@@ -82,18 +120,20 @@ export async function intervene(
 export async function tts(text: string): Promise<{ audioBase64: string; mimeType: string }> {
   const ai = getClient();
 
-  const response = await ai.models.generateContent({
-    model: GEMINI_TTS_MODEL,
-    contents: [{ role: "user", parts: [{ text }] }],
-    config: {
-      responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: TTS_VOICE_NAME },
+  const response = await withModelFallback([GEMINI_TTS_MODEL], (model) =>
+    ai.models.generateContent({
+      model,
+      contents: [{ role: "user", parts: [{ text }] }],
+      config: {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: TTS_VOICE_NAME },
+          },
         },
       },
-    },
-  });
+    })
+  );
 
   const part = response.candidates?.[0]?.content?.parts?.[0];
   const pcmBase64 = part?.inlineData?.data;
