@@ -107,9 +107,14 @@ export default function Home() {
     <div className="flex flex-1 flex-col items-center gap-8 bg-zinc-950 px-6 py-12">
       <div className="flex w-full max-w-md items-center justify-between">
         <span className="text-sm font-semibold tracking-tight text-zinc-50">Optimal</span>
-        <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-200">
-          History →
-        </Link>
+        <div className="flex gap-4">
+          <Link href="/onboarding" className="text-sm text-zinc-400 hover:text-zinc-200">
+            Onboarding
+          </Link>
+          <Link href="/history" className="text-sm text-zinc-400 hover:text-zinc-200">
+            History →
+          </Link>
+        </div>
       </div>
 
       {stage === "checkin" && <CheckInForm onSubmit={handleCheckIn} />}
