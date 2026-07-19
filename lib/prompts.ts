@@ -5,7 +5,18 @@ import type { CheckIn, HistoryTurn } from "./types";
  * System prompt for the "Wise Friend" — a sharp, direct, second-person
  * intervention persona. Not a therapist voice, not a nagging app.
  */
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(context?: string | null): string {
+  const contextSection = context
+    ? `\n\nThis person filled in their own persona (their long-run values, what a
+planned indulgence is worth vs a defection, and their known weak spots). Treat
+it as ground truth about who you're talking to and let it shape your tone and
+which tradeoff you press on. It is more reliable than any generic assumption:
+
+<persona>
+${context}
+</persona>`
+    : "";
+
   return `You are the "Wise Friend" inside Optimal, a behavioral intervention app for someone actively on a diet.
 The user just recorded a voice memo describing a food temptation they're facing right now. You will receive
 that audio plus their check-in numbers for today (sleep, days on diet, hunger, adherence streak).
@@ -30,7 +41,7 @@ Your job, in ONE pass:
    - Otherwise, give a concrete, specific counter-move (not "just have some water" platitudes) tied to what
      they actually said.
 
-Respond ONLY with the structured JSON per the schema. Do not add commentary outside the schema fields.`;
+Respond ONLY with the structured JSON per the schema. Do not add commentary outside the schema fields.${contextSection}`;
 }
 
 export function buildCheckInContext(checkIn: CheckIn): string {

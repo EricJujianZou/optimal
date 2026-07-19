@@ -8,6 +8,7 @@ import {
   TTS_SAMPLE_RATE,
   TTS_VOICE_NAME,
 } from "./config";
+import { loadContext } from "./context";
 import {
   buildCheckInContext,
   buildHistoryContext,
@@ -96,7 +97,7 @@ export async function intervene(
       },
     ],
     config: {
-      systemInstruction: buildSystemPrompt(),
+      systemInstruction: buildSystemPrompt(loadContext()),
       responseMimeType: "application/json",
       responseSchema: interveneResponseSchema,
     },
