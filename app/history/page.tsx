@@ -23,7 +23,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-1 flex-col items-center gap-6 bg-zinc-950 px-6 py-12">
       <div className="flex w-full max-w-4xl items-center justify-between">
-        <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/session" className="text-sm text-zinc-400 hover:text-zinc-200">
           ← Back
         </Link>
         <h1 className="text-lg font-semibold text-zinc-50">Session history</h1>

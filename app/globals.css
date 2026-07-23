@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #0c1016;
+  --paper: #e7ecf2;
+  --muted: #8a96a5;
+  --ink-elevated: #151b24;
+  --danger: #d4544f;
+  --background: #0c1016;
+  --foreground: #e7ecf2;
 }
 
 @theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-ink-elevated: var(--ink-elevated);
+  --color-danger: var(--danger);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-syne);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--paper) 22%, transparent);
+  color: var(--paper);
+}
+
+@keyframes film-line-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.film-line {
+  animation: film-line-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-line {
+    animation: none;
+  }
 }

@@ -1,6 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Geist, Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
+
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +26,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Optimal",
-  description: "Rational Twin behavioral intervention demo",
+  description:
+    "Make the right choice, anytime, anywhere. Reserve your spot on the waitlist.",
   applicationName: "Optimal",
   appleWebApp: {
     capable: true,
@@ -24,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
+  themeColor: "#0c1016",
   // The push-to-talk button is the app; lock zoom so a mistap can't scale it
   // mid-session on a phone.
   maximumScale: 1,
@@ -38,9 +51,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${syne.variable} ${dmSans.variable} ${geistSans.variable} ${geistMono.variable} ${dmSans.className} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-ink text-paper">
+        {children}
+      </body>
     </html>
   );
 }

@@ -4,6 +4,8 @@ A 5-minute localhost demo: quick check-in → push-to-talk voice temptation →
 Gemini-voiced "Wise Friend" intervention with a transparent reasoning trace →
 compliance decision logged to SQLite for future dual-self modeling.
 
+The marketing waitlist landing lives at `/`. The interactive demo is at `/session` (history at `/history`, Kirby onboarding at `/onboarding`).
+
 ## Setup
 
 ```bash
@@ -12,7 +14,7 @@ cp .env.example .env.local   # then fill in GEMINI_API_KEY
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) for the waitlist landing, or [http://localhost:3000/session](http://localhost:3000/session) for the demo.
 
 Get a Gemini API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
 Without a key set, `/api/intervene` returns a clear 500 error; the rest of the
@@ -23,7 +25,7 @@ first write).
 
 ## 5-minute reviewer script
 
-1. **Check-in** (`/`) — adjust sleep / days on diet / hunger / streak or accept
+1. **Check-in** (`/session`) — adjust sleep / days on diet / hunger / streak or accept
    the defaults, hit **Start session**.
 2. **Push-to-talk** — hold the mic button, describe a food temptation out
    loud ("I'm exhausted and there's pizza in the fridge"), release.

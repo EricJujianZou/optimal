@@ -61,7 +61,7 @@ export default function Onboarding() {
         <span className="text-sm font-semibold tracking-tight text-zinc-50">
           Optimal · Onboarding
         </span>
-        <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/session" className="text-sm text-zinc-400 hover:text-zinc-200">
           ← Home
         </Link>
       </div>
@@ -176,7 +176,7 @@ export default function Onboarding() {
 
           <div className="flex gap-4">
             <Link
-              href="/"
+              href="/session"
               className="rounded-full bg-emerald-500 px-5 py-2 font-medium text-black hover:bg-emerald-400"
             >
               Done
