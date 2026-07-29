@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type ProfileEvent = {
   id: number;
@@ -75,29 +75,41 @@ export default function ProfileMemoryPanel({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [openSnapshot, setOpenSnapshot] = useState(open);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/profile");
-      const data = (await res.json()) as ProfilePayload & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Could not load memory.");
-      setSummary(data.summary ?? "");
-      setPrefs(data.prefs ?? {});
-      setEvents(data.events ?? []);
-      setUpdatedAt(data.updated_at ?? null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not load memory.");
-    } finally {
-      setLoading(false);
+  // Reset loading when the panel opens (allowed render-time adjust-to-props).
+  if (open !== openSnapshot) {
+    setOpenSnapshot(open);
+    if (open) {
+      setLoading(true);
+      setError(null);
     }
-  }, []);
+  }
 
   useEffect(() => {
     if (!open) return;
-    void load();
-  }, [open, load]);
+    const ac = new AbortController();
+    fetch("/api/profile", { signal: ac.signal })
+      .then(async (res) => {
+        const data = (await res.json()) as ProfilePayload & { error?: string };
+        if (!res.ok) throw new Error(data.error ?? "Could not load memory.");
+        return data;
+      })
+      .then((data) => {
+        setSummary(data.summary ?? "");
+        setPrefs(data.prefs ?? {});
+        setEvents(data.events ?? []);
+        setUpdatedAt(data.updated_at ?? null);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setError(err instanceof Error ? err.message : "Could not load memory.");
+        setLoading(false);
+      });
+    return () => ac.abort();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

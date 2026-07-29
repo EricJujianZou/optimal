@@ -525,14 +525,10 @@ export default function DecidePage() {
           <div className="pointer-events-auto mb-8">
             <ErrorBanner
               message={error}
-              onRetry={
-                lastPayloadRef.current
-                  ? () => {
-                      const p = lastPayloadRef.current;
-                      if (p) void submit(p);
-                    }
-                  : undefined
-              }
+              onRetry={() => {
+                const p = lastPayloadRef.current;
+                if (p) void submit(p);
+              }}
               onDismiss={() => setError(null)}
             />
           </div>

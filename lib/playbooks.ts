@@ -293,7 +293,9 @@ function extractTripEndpoints(situation: string): {
               )?.[1] || null;
   const withCity = (place: string) => {
     if (!city) return place;
-    let p = place.replace(/\bSF\b/gi, "San Francisco").replace(/\bNYC\b/gi, "New York");
+    const p = place
+      .replace(/\bSF\b/gi, "San Francisco")
+      .replace(/\bNYC\b/gi, "New York");
     if (new RegExp(city.replace(/\s+/g, "\\s+"), "i").test(p)) return p;
     return `${p} ${city}`;
   };

@@ -134,27 +134,6 @@ async function fetchJson(
   }
 }
 
-async function fetchText(
-  url: string,
-  timeoutMs = 3500,
-  init?: RequestInit
-): Promise<string> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, {
-      ...init,
-      signal: ctrl.signal,
-      redirect: "follow",
-      headers: { "User-Agent": UA, ...(init?.headers || {}) },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 /** Offered catalog — route/route_compare/plan_transit/nearby_places are internal. */
 export const openRouterTools: ToolDef[] = [
   {
