@@ -110,3 +110,154 @@ export const NewSessionSchema = z.object({
 });
 
 export type NewSession = z.infer<typeof NewSessionSchema>;
+
+// ─────────────────────────────────────────────────────────────────────────
+// /api/decide — general life decisions
+// ─────────────────────────────────────────────────────────────────────────
+
+export const DecidePayloadSchema = z
+  .object({
+    audioBase64: z.string().min(1).optional(),
+    mimeType: z.string().min(1).optional(),
+    textSituation: z.string().min(1).optional(),
+    history: z.array(HistoryTurnSchema).default([]),
+    lat: z.number().min(-90).max(90).optional(),
+    lon: z.number().min(-180).max(180).optional(),
+  })
+  .refine(
+    (v) =>
+      Boolean(v.textSituation?.trim()) ||
+      (Boolean(v.audioBase64) && Boolean(v.mimeType)),
+    { message: "Provide textSituation or audioBase64+mimeType." }
+  );
+
+export type DecidePayload = z.infer<typeof DecidePayloadSchema>;
+
+export const ProfilePrefsSchema = z.object({
+  risk_tolerance: z.enum(["low", "medium", "high"]).optional(),
+  money_anxiety: z.enum(["low", "medium", "high"]).optional(),
+  default_tip_pct: z.number().min(0).max(40).optional(),
+  home_label: z.string().max(120).optional(),
+  work_label: z.string().max(120).optional(),
+  lat: z.number().optional(),
+  lon: z.number().optional(),
+  hard_constraints: z.string().max(400).optional(),
+});
+
+export type ProfilePrefs = z.infer<typeof ProfilePrefsSchema>;
+
+export const DecideFeedbackSchema = z.object({
+  decisionId: z.number().int().positive(),
+  outcome: z.enum(["did_it", "did_other", "ignored"]),
+  note: z.string().max(400).optional(),
+});
+
+export type DecideFeedback = z.infer<typeof DecideFeedbackSchema>;
+
+export const AlternativeSchema = z.object({
+  option: z.string(),
+  confidence: z.coerce.number().min(0).max(1),
+  note: z.string(),
+});
+
+/** Internal scores — never sent to the client. Slim: one score per option. */
+export const EvaluationItemSchema = z.object({
+  option: z.string(),
+  score: z.coerce.number().min(0).max(10).default(5),
+  note: z.string().default(""),
+  // Legacy fields optional so old shapes don't crash parsers.
+  short_run_temptation: z.coerce.number().min(0).max(10).optional(),
+  long_run_benefit: z.coerce.number().min(0).max(10).optional(),
+  self_control_cost: z.coerce.number().min(0).max(10).optional(),
+  feasibility: z.coerce.number().min(0).max(10).optional(),
+  ethics_other_regarding: z.coerce.number().min(0).max(10).optional(),
+  commitment_leverage: z.coerce.number().min(0).max(10).optional(),
+});
+
+export const DecideResultSchema = z.object({
+  status: z.preprocess((v) => {
+    const s = String(v ?? "").toLowerCase();
+    return s === "clarify" ? "clarify" : "decide";
+  }, z.enum(["clarify", "decide"])),
+  transcript: z.string().default(""),
+  clarifying_questions: z.array(z.string()).default([]),
+  options: z.array(z.string()).default([]),
+  options_source: z.preprocess((v) => {
+    const s = String(v ?? "").toLowerCase();
+    return s === "user" || s === "inferred" || s === "mixed" ? s : "inferred";
+  }, z.enum(["user", "inferred", "mixed"])),
+  evaluation: z.array(EvaluationItemSchema).default([]),
+  recommendation: z.string().default(""),
+  user_preference_conflict: z.boolean().default(false),
+  why: z.string().default(""),
+  alternatives: z.array(AlternativeSchema).default([]),
+  /** Internal only — used to calibrate spoken tone. Never shown in UI. */
+  confidence: z.coerce.number().min(0).max(1).default(0),
+  spoken_advice: z.string().default(""),
+  profile_update: z.string().optional().default(""),
+});
+
+export type DecideResult = z.infer<typeof DecideResultSchema>;
+
+/** Public API response. confidence/evaluation omitted so clients cannot display them. */
+export interface DecideResponse {
+  status: "clarify" | "decide";
+  transcript: string;
+  clarifying_questions: string[];
+  options: string[];
+  options_source: "user" | "inferred" | "mixed";
+  recommendation: string;
+  user_preference_conflict: boolean;
+  why: string;
+  alternatives: { option: string; note: string }[];
+  spoken_advice: string;
+  audioBase64: string | null;
+  audioMimeType: string | null;
+  latencyMs: number;
+  decisionId: number | null;
+  /** DuckDuckGo snippets used for this answer (titles only for UI). */
+  sources?: { title: string }[];
+}
+
+export interface ProfileRow {
+  id: number;
+  summary: string;
+  prefs_json: string;
+  updated_at: string;
+}
+
+export interface ProfileEventRow {
+  id: number;
+  created_at: string;
+  kind: string;
+  content: string;
+  decision_id: number | null;
+}
+
+export interface DecisionRow {
+  id: number;
+  created_at: string;
+  transcript: string;
+  extra_context: string;
+  options_json: string;
+  options_source: string;
+  recommendation: string;
+  why: string;
+  alternatives_json: string;
+  confidence: number;
+  spoken_advice: string;
+  latency_ms: number;
+}
+
+export interface NewDecisionRecord {
+  transcript: string;
+  extra_context: string;
+  options: string[];
+  options_source: string;
+  recommendation: string;
+  why: string;
+  alternatives: z.infer<typeof AlternativeSchema>[];
+  confidence: number;
+  spoken_advice: string;
+  latency_ms: number;
+}

@@ -1,66 +1,111 @@
-# Optimal — Rational Twin V0
+# Megamind — life decision advisor
 
-A 5-minute localhost demo: quick check-in → push-to-talk voice temptation →
-Gemini-voiced "Wise Friend" intervention with a transparent reasoning trace →
-compliance decision logged to SQLite for future dual-self modeling.
+**Primary demo:** speak or type a situation at
+[`/decide`](http://localhost:3000/decide) → Megamind returns a clear
+recommendation, why, and spoken advice. Live facts (search, maps, weather,
+forex, holidays, etc.) are gathered server-side when they flip the answer.
+Clarifying questions appear only when a missing personal fact would change #1.
 
-The marketing waitlist landing lives at `/`. The interactive demo is at `/session` (history at `/history`, Kirby onboarding at `/onboarding`).
+The marketing waitlist lives at `/`. The older diet “Wise Friend” lab remains
+at `/session` (history `/history`, Kirby `/onboarding`) but is not linked from
+the primary nav.
 
-## Setup
+## Quick start
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in GEMINI_API_KEY
+cp .env.example .env.local
+# Edit .env.local — add keys (never commit this file)
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the waitlist landing, or [http://localhost:3000/session](http://localhost:3000/session) for the demo.
+Open [http://localhost:3000/decide](http://localhost:3000/decide).
 
-Get a Gemini API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
-Without a key set, `/api/intervene` returns a clear 500 error; the rest of the
-app (check-in, history, CSV export) still works.
+### Environment (`.env.local`)
 
-Session data is stored at `data/optimal.db` (SQLite, gitignored, created on
-first write).
+Copy from `.env.example`. **Do not commit real keys.**
 
-## 5-minute reviewer script
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `OPENROUTER_API_KEY` | **Yes** for `/decide` | LLM synthesis via [OpenRouter](https://openrouter.ai/) |
+| `OPENROUTER_MODEL` | No | Default `inclusionai/ling-3.0-flash:free` |
+| `EXA_API_KEY` | No | Better web search; falls back to DuckDuckGo/Jina |
+| `GEMINI_API_KEY` | No for decide | Still used by legacy `/session` TTS / intervene |
 
-1. **Check-in** (`/session`) — adjust sleep / days on diet / hunger / streak or accept
-   the defaults, hit **Start session**.
-2. **Push-to-talk** — hold the mic button, describe a food temptation out
-   loud ("I'm exhausted and there's pizza in the fridge"), release.
-3. **Intervention** — Gemini transcribes the audio, extracts craving
-   intensity / temptation type / context tags, writes a reasoning trace
-   weighing short-term impulse vs. long-term value, and speaks a 2-3 sentence
-   Wise Friend message (auto-plays; replay button available). Expand
-   "Show reasoning trace" and "Transcript" to inspect the raw output.
-   You can hit "Talk again instead" to continue the conversation
-   multi-turn before deciding.
-4. **Decide** — log Complied / Partial / Defected with an optional note via
-   the DecisionLogger panel.
-5. **History** (`/history`) — see every logged session in a table; **Export
-   CSV** downloads the full dataset for offline analysis / model training.
+```bash
+# .env.example shape (values stay empty in git)
+OPENROUTER_API_KEY=
+OPENROUTER_MODEL=inclusionai/ling-3.0-flash:free
+EXA_API_KEY=
+GEMINI_API_KEY=
+```
 
-## Architecture
+Session/decision data: `data/optimal.db` (SQLite, gitignored).
+
+## How decide works
 
 ```
-Browser (push-to-talk mic, MediaRecorder, webm)
-   → POST /api/intervene  { audioBase64, mimeType, checkIn, history }
-      1. Gemini gemini-2.5-flash multimodal: audio → structured JSON via responseSchema
-         { transcript, craving_intensity, temptation_type, context_tags[],
-           reasoning_trace, intervention_text }
-      2. Gemini TTS (gemini-2.5-flash-preview-tts): intervention_text → PCM → WAV base64
-   → Browser plays audio, shows transcript + extracted vars + reasoning trace
-   → User logs decision → POST /api/sessions → SQLite row
+UI /decide
+  → POST /api/decide  (SSE by default; JSON if Accept: application/json)
+  → playbook prefetch (tip / commute / weather / forex / nearby / … — no LLM tool round)
+  → one OpenRouter synthesis call with facts in the prompt
+  → SSE: stage → sources → partial → final
 ```
+
+User-facing copy is sanitized so internal tool names / priors / playbook jargon
+do not leak into recommendation / why / spoken advice.
+
+## Eval & stress scripts
+
+With the dev server running (default scripts target `http://localhost:3001`
+unless you pass a base URL):
+
+```bash
+# Golden everyday dilemmas
+npm run eval:decide
+# or: node scripts/eval-decide.mjs http://localhost:3000
+
+# Broad stress battery (~45 cases)
+node scripts/stress-decide.mjs http://localhost:3000
+
+# Real-world dilemmas (career / rent / tip / health / …)
+node scripts/real-dilemmas.mjs http://localhost:3000
+
+# Quick smoke
+node scripts/smoke-decide.mjs
+```
+
+Free OpenRouter tiers rate-limit easily — scripts run **sequentially** with
+retries/gaps. Latest run summaries write to `scripts/*-last.json` (gitignored).
+
+## Internet reach (Agent-Reach style)
+
+In-process channels in `lib/agent-reach.ts`:
+
+| Channel | Backend |
+|---------|---------|
+| Search | Exa (`EXA_API_KEY`) → DDG/Jina |
+| Web | Jina Reader |
+| GitHub | `gh` or public API |
+| YouTube | `yt-dlp` or oEmbed + Jina |
+| RSS/Atom | Native XML (`reach_rss`) |
+| Reddit / V2EX / LinkedIn / X | Best-effort public/Jina |
+
+Decide playbooks call these via tools such as `reach_search`, `reach_read`,
+`plan_trip`, `find_nearby`, `weather`, `forex_rate`, `public_holidays`, etc.
+
+## Diet lab (legacy)
+
+`/session` still uses Gemini for the Wise Friend food-temptation flow. See
+older notes in `PLAN-YOURS.md` if you need that path. Get a Gemini key at
+[aistudio.google.com/apikey](https://aistudio.google.com/apikey).
 
 ## Stack
 
-Next.js 15 (App Router) + TypeScript + Tailwind, `@google/genai`,
-`better-sqlite3`, `zod`.
+Next.js (App Router) + TypeScript + Tailwind, OpenRouter (decide), optional
+`@google/genai` (legacy), `better-sqlite3`, `zod`.
 
 ## Notes
 
-- `components/DecisionLogger.tsx` contract is frozen in `lib/types.ts`
-  (`Decision`, `DecisionLoggerProps`) — see `PLAN-YOURS.md`.
-- `npm run build` must pass clean before shipping changes.
+- Never commit `.env.local` or paste API keys into issues/PRs.
+- `npm run build` should pass before shipping.

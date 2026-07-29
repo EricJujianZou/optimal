@@ -25,13 +25,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Optimal",
+  title: "Megamind",
   description:
     "Make the right choice, anytime, anywhere. Reserve your spot on the waitlist.",
-  applicationName: "Optimal",
+  applicationName: "Megamind",
   appleWebApp: {
     capable: true,
-    title: "Optimal",
+    title: "Megamind",
     statusBarStyle: "black-translucent",
   },
 };

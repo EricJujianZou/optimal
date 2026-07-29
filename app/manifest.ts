@@ -2,15 +2,15 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Optimal — Rational Twin",
-    short_name: "Optimal",
+    name: "Megamind",
+    short_name: "Megamind",
     description:
-      "Push-to-talk behavioral intervention for food temptations, in the moment.",
-    start_url: "/",
+      "Life decisions with dual-self reasoning — temptation vs long-run welfare.",
+    start_url: "/decide",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#09090b",
-    theme_color: "#09090b",
+    background_color: "#0c1016",
+    theme_color: "#0c1016",
     icons: [
       {
         src: "/icon",

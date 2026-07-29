@@ -13,6 +13,14 @@ export function Waitlist() {
         <p className="mt-5 max-w-[26ch] text-[15px] leading-relaxed text-muted sm:text-base">
           Early access when Megamind opens.
         </p>
+        <p className="mt-4">
+          <a
+            href="/decide"
+            className="text-sm font-medium text-paper underline decoration-paper/30 underline-offset-4 transition-colors hover:decoration-paper"
+          >
+            Or try the decision demo now →
+          </a>
+        </p>
         <div className="mt-10 sm:mt-12">
           <WaitlistForm />
         </div>

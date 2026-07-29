@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "eval:decide": "node scripts/eval-decide.mjs",
+    "eval:stress": "node scripts/stress-decide.mjs",
+    "eval:real": "node scripts/real-dilemmas.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.12.0",
