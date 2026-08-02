@@ -3,8 +3,7 @@ import { ImageResponse } from "next/og";
 export const size = { width: 512, height: 512 };
 export const contentType = "image/png";
 
-// Home-screen / PWA icon: emerald "O" on the app's near-black background,
-// matching the UI accent (emerald-500 on zinc-950).
+/** PWA / home-screen icon — Night study brass M on warm ink. */
 export default function Icon() {
   return new ImageResponse(
     (
@@ -15,13 +14,14 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#09090b",
-          color: "#10b981",
-          fontSize: 320,
-          fontWeight: 700,
+          background: "#2a241c",
+          color: "#c4a574",
+          fontSize: 280,
+          fontWeight: 600,
+          fontFamily: "Georgia, serif",
         }}
       >
-        O
+        M
       </div>
     ),
     { ...size }

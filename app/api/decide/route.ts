@@ -14,8 +14,40 @@ import type { DecideProgressEvent } from "@/lib/openrouter-decide";
 import {
   DecidePayloadSchema,
   type DecideResponse,
+  type DecideWeight,
   type ProfilePrefs,
 } from "@/lib/types";
+
+function deriveWeight(
+  result: Awaited<ReturnType<typeof decide>>["result"],
+  historyLen: number
+): DecideWeight {
+  if (result.status === "clarify") return "heavy";
+  if (result.user_preference_conflict) return "heavy";
+  if (result.alternatives.length >= 2) return "heavy";
+  if (result.confidence < 0.55) return "heavy";
+  // Prior clarify turns live in history as user+assistant pairs
+  if (historyLen >= 2) return "heavy";
+  return "everyday";
+}
+
+function memoryHintsFromProfile(
+  summary: string,
+  prefsBlock: string
+): string[] {
+  const hints: string[] = [];
+  for (const part of prefsBlock.split(/(?<=\.)\s+/)) {
+    const t = part.trim();
+    if (t.length > 8) hints.push(t.replace(/\.$/, ""));
+    if (hints.length >= 3) return hints;
+  }
+  for (const line of summary.split(/\n+/)) {
+    const t = line.replace(/^[-•*]\s*/, "").trim();
+    if (t.length > 8) hints.push(t.slice(0, 80));
+    if (hints.length >= 3) break;
+  }
+  return hints.slice(0, 3);
+}
 
 function toPublicResponse(
   result: Awaited<ReturnType<typeof decide>>["result"],
@@ -23,6 +55,8 @@ function toPublicResponse(
     latencyMs: number;
     decisionId: number | null;
     sources: { title: string }[];
+    historyLen: number;
+    memory_hints: string[];
   }
 ): DecideResponse {
   return {
@@ -44,6 +78,8 @@ function toPublicResponse(
     latencyMs: extras.latencyMs,
     decisionId: extras.decisionId,
     sources: extras.sources,
+    weight: deriveWeight(result, extras.historyLen),
+    memory_hints: extras.memory_hints,
   };
 }
 
@@ -102,7 +138,15 @@ async function runDecide(
   const profile = getProfile();
   const prefs = getProfilePrefs();
   const prefsBlock = formatPrefsBlock(prefs);
-  const { audioBase64, mimeType, textSituation, history, lat, lon } = parsed;
+  const {
+    audioBase64,
+    mimeType,
+    textSituation,
+    history,
+    lat,
+    lon,
+    amendIntent,
+  } = parsed;
   const trimmedHistory = history.slice(-3);
 
   if (Number.isFinite(lat) && Number.isFinite(lon)) {
@@ -119,9 +163,18 @@ async function runDecide(
     lat: lat ?? prefs.lat,
     lon: lon ?? prefs.lon,
     prefsBlock,
+    amendIntent,
     onProgress,
   });
   const latencyMs = Date.now() - startedAt;
+
+  const hints = memoryHintsFromProfile(profile.summary, prefsBlock);
+  const publicExtras = {
+    latencyMs,
+    sources,
+    historyLen: trimmedHistory.length,
+    memory_hints: hints,
+  };
 
   if (result.status === "clarify") {
     if (result.profile_update?.trim()) {
@@ -132,7 +185,10 @@ async function runDecide(
       );
       mergePrefsFromUpdate(result.profile_update, lat, lon);
     }
-    return toPublicResponse(result, { latencyMs, decisionId: null, sources });
+    return toPublicResponse(result, {
+      ...publicExtras,
+      decisionId: null,
+    });
   }
 
   const decision = insertDecision({
@@ -164,9 +220,8 @@ async function runDecide(
   }
 
   return toPublicResponse(result, {
-    latencyMs,
+    ...publicExtras,
     decisionId: decision.id,
-    sources,
   });
 }
 

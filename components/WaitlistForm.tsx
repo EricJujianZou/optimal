@@ -36,7 +36,7 @@ export function WaitlistForm() {
     <div className="w-full max-w-md">
       <form
         onSubmit={onSubmit}
-        className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-0"
+        className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2"
         noValidate
       >
         <label htmlFor="waitlist-email" className="sr-only">
@@ -55,11 +55,11 @@ export function WaitlistForm() {
           }}
           aria-invalid={!!error}
           aria-describedby={error ? "waitlist-email-error" : undefined}
-          className="min-h-12 flex-1 border border-paper/18 bg-transparent px-4 text-[15px] text-paper placeholder:text-muted/75 outline-none transition-[border-color] duration-150 focus:border-paper/45"
+          className="min-h-12 flex-1 rounded-lg border border-[var(--line)] bg-ink-elevated/40 px-4 text-[15px] text-paper placeholder:text-muted-dim outline-none transition-[border-color] duration-150 focus:border-brass/50"
         />
         <button
           type="submit"
-          className="min-h-12 bg-paper px-6 text-[15px] font-semibold tracking-tight text-ink transition-opacity duration-150 hover:opacity-90"
+          className="min-h-12 rounded-lg bg-brass px-6 text-[15px] font-semibold tracking-tight text-brass-ink transition-opacity duration-150 hover:opacity-90"
         >
           Join waitlist
         </button>

@@ -5,12 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Megamind",
     short_name: "Megamind",
     description:
-      "Life decisions with dual-self reasoning — temptation vs long-run welfare.",
+      "Speak a situation. Get a clear recommendation — calm counsel for everyday calls and heavier choices.",
     start_url: "/decide",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#0c1016",
-    theme_color: "#0c1016",
+    background_color: "#2a241c",
+    theme_color: "#2a241c",
     icons: [
       {
         src: "/icon",

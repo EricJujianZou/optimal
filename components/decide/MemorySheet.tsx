@@ -60,7 +60,7 @@ function prefsLines(prefs?: ProfilePrefs): string[] {
   return lines;
 }
 
-export default function ProfileMemoryPanel({
+export default function MemorySheet({
   open,
   onClose,
 }: {
@@ -77,7 +77,6 @@ export default function ProfileMemoryPanel({
   const [savedFlash, setSavedFlash] = useState(false);
   const [openSnapshot, setOpenSnapshot] = useState(open);
 
-  // Reset loading when the panel opens (allowed render-time adjust-to-props).
   if (open !== openSnapshot) {
     setOpenSnapshot(open);
     if (open) {
@@ -119,7 +118,6 @@ export default function ProfileMemoryPanel({
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    // Focus close control for keyboard users
     window.setTimeout(() => {
       document.getElementById("memory-close")?.focus();
     }, 0);
@@ -206,8 +204,8 @@ export default function ProfileMemoryPanel({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/70"
-        aria-label="Close memory panel"
+        className="absolute inset-0 bg-ink/75"
+        aria-label="Close memory"
         onClick={onClose}
       />
       <div
@@ -215,25 +213,25 @@ export default function ProfileMemoryPanel({
         role="dialog"
         aria-modal="true"
         aria-labelledby="memory-title"
-        className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-[var(--line)] bg-[#121820] shadow-2xl sm:rounded-2xl"
+        className="relative z-10 flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-t-xl border border-[var(--line)] bg-ink-elevated shadow-2xl sm:rounded-xl"
       >
         <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
           <div>
             <h2
               id="memory-title"
-              className="font-display text-lg font-bold tracking-[-0.03em] text-paper"
+              className="font-serif text-lg font-semibold tracking-[-0.02em] text-paper"
             >
-              Memory
+              What Megamind knows
             </h2>
             <p className="mt-0.5 text-xs text-muted">
-              What Megamind keeps about you — edit freely.
+              Lasting preferences used in your recommendations — edit anytime.
             </p>
           </div>
           <button
             id="memory-close"
             type="button"
             onClick={onClose}
-            className="text-sm font-medium text-muted transition-colors hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            className="min-h-10 text-sm font-medium text-muted transition-colors hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
             Close
           </button>
@@ -247,9 +245,9 @@ export default function ProfileMemoryPanel({
               <section>
                 <label
                   htmlFor="profile-summary"
-                  className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted"
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted"
                 >
-                  Lasting profile
+                  Lasting preferences
                 </label>
                 <textarea
                   id="profile-summary"
@@ -257,11 +255,14 @@ export default function ProfileMemoryPanel({
                   onChange={(e) => setSummary(e.target.value)}
                   rows={8}
                   placeholder="Nothing saved yet. Facts you share across decisions will show up here."
-                  className="mt-3 w-full resize-y rounded-md border border-[var(--line)] bg-ink/40 px-3 py-2.5 text-[0.95rem] leading-relaxed text-paper placeholder:text-muted focus:border-paper/45 focus:outline-none"
+                  className="mt-3 w-full resize-y rounded-lg border border-[var(--line)] bg-ink/50 px-3 py-2.5 text-[0.95rem] leading-relaxed text-paper placeholder:text-muted-dim focus:border-brass/45 focus:outline-none"
                 />
                 {updatedAt && (
                   <p className="mt-2 text-xs text-muted">
-                    Updated {new Date(updatedAt.replace(" ", "T") + "Z").toLocaleString()}
+                    Updated{" "}
+                    {new Date(
+                      updatedAt.replace(" ", "T") + "Z"
+                    ).toLocaleString()}
                   </p>
                 )}
                 <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -269,7 +270,7 @@ export default function ProfileMemoryPanel({
                     type="button"
                     disabled={saving}
                     onClick={() => void save()}
-                    className="rounded-full bg-paper px-4 py-2 text-sm font-semibold text-ink transition-opacity hover:opacity-90 disabled:opacity-40"
+                    className="min-h-10 rounded-lg bg-brass px-4 py-2 text-sm font-semibold text-brass-ink transition-opacity hover:opacity-90 disabled:opacity-40"
                   >
                     {saving ? "Saving…" : savedFlash ? "Saved" : "Save"}
                   </button>
@@ -277,7 +278,7 @@ export default function ProfileMemoryPanel({
                     type="button"
                     disabled={saving}
                     onClick={() => void clearAll()}
-                    className="text-sm font-medium text-danger transition-opacity hover:opacity-90 disabled:opacity-40"
+                    className="min-h-10 text-sm font-medium text-danger transition-opacity hover:opacity-90 disabled:opacity-40"
                   >
                     Clear all memory
                   </button>
@@ -286,7 +287,7 @@ export default function ProfileMemoryPanel({
 
               {prefsLines(prefs).length > 0 && (
                 <section>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                     Structured prefs
                   </p>
                   <ul className="mt-3 space-y-1.5 text-sm text-paper/85">
@@ -298,7 +299,7 @@ export default function ProfileMemoryPanel({
               )}
 
               <section>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                   Recent notes
                 </p>
                 {events.length === 0 ? (
@@ -318,7 +319,7 @@ export default function ProfileMemoryPanel({
                         <button
                           type="button"
                           onClick={() => void removeEvent(ev.id)}
-                          className="shrink-0 self-start text-xs font-medium text-muted hover:text-danger"
+                          className="min-h-10 shrink-0 self-start text-xs font-medium text-muted hover:text-danger"
                         >
                           Remove
                         </button>

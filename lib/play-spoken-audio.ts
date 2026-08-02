@@ -48,7 +48,10 @@ function pickLocalVoice(): SpeechSynthesisVoice | null {
 }
 
 /** Local on-device TTS via the Web Speech API (no cloud quota). */
-export function playBrowserSpeech(text: string): SpokenPlayback {
+export function playBrowserSpeech(
+  text: string,
+  opts?: { onEnd?: () => void }
+): SpokenPlayback {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     return { stop: () => undefined };
   }
@@ -64,6 +67,13 @@ export function playBrowserSpeech(text: string): SpokenPlayback {
   utter.pitch = 1;
   const voice = pickLocalVoice();
   if (voice) utter.voice = voice;
+
+  utter.onend = () => {
+    if (!stopped) opts?.onEnd?.();
+  };
+  utter.onerror = () => {
+    if (!stopped) opts?.onEnd?.();
+  };
 
   const clearPending = () => {
     if (timer != null) {

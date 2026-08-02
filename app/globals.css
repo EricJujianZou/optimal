@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #0c1016;
-  --paper: #eef2f7;
-  /* ~WCAG AA on ink — was too dim at #8a96a5 */
-  --muted: #a7b3c2;
-  --muted-dim: #7d8a9a;
-  --ink-elevated: #151b24;
-  --danger: #e86a64;
-  --background: #0c1016;
-  --foreground: #eef2f7;
-  --line: color-mix(in srgb, var(--paper) 16%, transparent);
-  --focus-ring: color-mix(in srgb, var(--paper) 55%, transparent);
+  /* Night study — warm graphite, not cool cyber */
+  --ink: oklch(0.18 0.012 75);
+  --ink-elevated: oklch(0.23 0.014 75);
+  --paper: oklch(0.93 0.01 85);
+  --muted: oklch(0.76 0.02 75);
+  --muted-dim: oklch(0.62 0.018 75);
+  --brass: oklch(0.72 0.1 75);
+  --brass-ink: oklch(0.22 0.04 75);
+  --danger: oklch(0.68 0.14 25);
+  --background: var(--ink);
+  --foreground: var(--paper);
+  --line: color-mix(in oklab, var(--paper) 14%, transparent);
+  --focus-ring: color-mix(in oklab, var(--brass) 70%, var(--paper));
 }
 
 @theme inline {
@@ -20,10 +22,13 @@
   --color-muted: var(--muted);
   --color-muted-dim: var(--muted-dim);
   --color-ink-elevated: var(--ink-elevated);
+  --color-brass: var(--brass);
+  --color-brass-ink: var(--brass-ink);
   --color-danger: var(--danger);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-display: var(--font-syne);
+  --font-display: var(--font-source-serif);
+  --font-serif: var(--font-source-serif);
   --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -51,12 +56,14 @@ body {
   border-width: 0;
 }
 
-.font-display {
-  font-family: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+.font-display,
+.font-serif,
+.verdict-serif {
+  font-family: var(--font-source-serif), "Source Serif 4", Georgia, serif;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--paper) 22%, transparent);
+  background: color-mix(in oklab, var(--brass) 35%, transparent);
   color: var(--paper);
 }
 
@@ -75,10 +82,10 @@ body {
   animation: film-line-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes decide-reveal {
+@keyframes decide-settle {
   from {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
+    transform: translate3d(0, 12px, 0);
   }
   to {
     opacity: 1;
@@ -86,23 +93,26 @@ body {
   }
 }
 
+.decide-settle,
 .decide-reveal {
-  animation: decide-reveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: decide-settle 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes decide-ring {
-  0% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
+@keyframes voice-breathe {
+  0%,
   100% {
-    transform: scale(1.28);
-    opacity: 0;
+    opacity: 0.45;
+    transform: scaleY(0.55);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
   }
 }
 
-.animate-decide-ring {
-  animation: decide-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.voice-wave-bar {
+  animation: voice-breathe 1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  transform-origin: center;
 }
 
 @keyframes decide-indeterminate {
@@ -118,23 +128,39 @@ body {
   height: 2px;
   width: 100%;
   overflow: hidden;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 20%, transparent);
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--paper) 16%, transparent);
 }
 
 .decide-progress-bar {
   height: 100%;
   width: 36%;
-  border-radius: 999px;
-  background: var(--paper);
-  animation: decide-indeterminate 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  border-radius: 2px;
+  background: var(--brass);
+  animation: decide-indeterminate 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95)
+    infinite;
   will-change: transform;
+}
+
+.night-ambient {
+  background: radial-gradient(
+      ellipse 70% 48% at 50% -10%,
+      color-mix(in oklab, var(--brass) 12%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      180deg,
+      oklch(0.2 0.014 75) 0%,
+      var(--ink) 42%,
+      oklch(0.15 0.01 75) 100%
+    );
 }
 
 @media (prefers-reduced-motion: reduce) {
   .film-line,
+  .decide-settle,
   .decide-reveal,
-  .animate-decide-ring,
+  .voice-wave-bar,
   .decide-progress-bar {
     animation: none;
   }
@@ -142,5 +168,10 @@ body {
   .decide-progress-bar {
     width: 100%;
     opacity: 0.45;
+  }
+
+  .voice-wave-bar {
+    opacity: 0.7;
+    transform: none;
   }
 }

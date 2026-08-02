@@ -1,22 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Geist, Geist_Mono, Syne } from "next/font/google";
+import { DM_Sans, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -27,7 +22,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Megamind",
   description:
-    "Make the right choice, anytime, anywhere. Reserve your spot on the waitlist.",
+    "Speak a situation. Get a clear recommendation — calm counsel for everyday calls and heavier choices.",
   applicationName: "Megamind",
   appleWebApp: {
     capable: true,
@@ -37,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c1016",
+  themeColor: "#2a241c",
   // The push-to-talk button is the app; lock zoom so a mistap can't scale it
   // mid-session on a phone.
   maximumScale: 1,
@@ -51,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${geistSans.variable} ${geistMono.variable} ${dmSans.className} h-full antialiased`}
+      className={`${sourceSerif.variable} ${dmSans.variable} ${geistMono.variable} ${dmSans.className} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-paper">
         {children}

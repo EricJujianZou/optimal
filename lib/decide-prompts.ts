@@ -109,6 +109,7 @@ export function buildDecideUserPrompt(args: {
   hasAudio: boolean;
   factsJson?: string;
   intent?: string;
+  amendIntent?: "push_back" | "add_fact" | "go_deeper";
 }): string {
   const parts: string[] = [];
 
@@ -117,6 +118,20 @@ export function buildDecideUserPrompt(args: {
   }
   if (args.textSituation?.trim()) {
     parts.push(`Current situation:\n${clip(args.textSituation, SITUATION_MAX)}`);
+  }
+
+  if (args.amendIntent === "push_back") {
+    parts.push(
+      "Amend mode: the user is pushing back on your last recommendation. Take the objection seriously and revise the call if warranted — do not dig in just to defend the prior pick."
+    );
+  } else if (args.amendIntent === "add_fact") {
+    parts.push(
+      "Amend mode: the user is adding a fact that may change the call. Fold it into the argument and update the recommendation if it flips #1."
+    );
+  } else if (args.amendIntent === "go_deeper") {
+    parts.push(
+      "Amend mode: the user wants more depth on the same decision. Keep the same recommendation unless new info flips it; expand why, tradeoffs, and next steps."
+    );
   }
 
   const history = args.history.slice(-HISTORY_MAX_TURNS);

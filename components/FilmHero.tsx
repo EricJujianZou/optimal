@@ -133,30 +133,52 @@ export function FilmHero() {
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
-    video.preload = "auto";
+    video.preload = "metadata";
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
     video.src = videoSrc();
     video.load();
 
+    let upgraded = false;
+    const upgradeMedia = () => {
+      if (upgraded) return;
+      upgraded = true;
+      video.preload = "auto";
+      try {
+        void video
+          .play()
+          .then(() => video.pause())
+          .catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const onScrollWithUpgrade = () => {
+      upgradeMedia();
+      onScroll();
+    };
+
     video.addEventListener("loadedmetadata", arm);
     video.addEventListener("loadeddata", arm);
     video.addEventListener("canplay", arm);
     video.addEventListener("seeked", onSeeked);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", onScrollWithUpgrade, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
 
     if (video.readyState >= 1) arm();
     sync();
+    const warm = window.setTimeout(upgradeMedia, 900);
 
     return () => {
       alive = false;
+      window.clearTimeout(warm);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       video.removeEventListener("loadedmetadata", arm);
       video.removeEventListener("loadeddata", arm);
       video.removeEventListener("canplay", arm);
       video.removeEventListener("seeked", onSeeked);
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScrollWithUpgrade);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
@@ -174,7 +196,7 @@ export function FilmHero() {
           className="absolute inset-0 h-full w-full object-cover"
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           poster="/megamind-scroll-poster.jpg"
           disablePictureInPicture
           aria-hidden
@@ -198,16 +220,33 @@ export function FilmHero() {
         />
 
         <div className="pointer-events-none absolute inset-0 flex flex-col justify-between px-6 pb-9 pt-6 sm:px-8 sm:pb-11 sm:pt-7">
-          <div className="mx-auto w-full max-w-5xl">
-            <p className="font-display text-[clamp(2.75rem,8vw,5.25rem)] font-extrabold leading-[0.9] tracking-[-0.05em] text-paper">
+          <div className="mx-auto w-full max-w-5xl pt-10 sm:pt-12">
+            <p className="font-serif text-[clamp(2.75rem,8vw,5.25rem)] font-semibold leading-[0.92] tracking-[-0.03em] text-paper">
               Megamind
             </p>
+            <p className="mt-4 max-w-[28ch] text-[15px] leading-relaxed text-paper/75 sm:text-base">
+              Speak a situation. Get the clear call.
+            </p>
+            <div className="pointer-events-auto mt-6 flex flex-wrap gap-3">
+              <a
+                href="/decide"
+                className="inline-flex min-h-11 items-center rounded-lg bg-brass px-5 text-sm font-semibold text-brass-ink transition-opacity hover:opacity-90"
+              >
+                Decide now
+              </a>
+              <a
+                href="#waitlist"
+                className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-paper/70 underline-offset-4 transition-colors hover:text-paper hover:underline"
+              >
+                Join waitlist
+              </a>
+            </div>
           </div>
 
           <div className="mx-auto w-full max-w-5xl">
             <p
               key={beat}
-              className={`film-line font-display text-[clamp(1.7rem,4.2vw,2.85rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-paper ${
+              className={`film-line font-serif text-[clamp(1.7rem,4.2vw,2.85rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-paper ${
                 beat === 0 ? "max-w-[16ch]" : "max-w-[10ch]"
               }`}
               aria-live="polite"
@@ -217,7 +256,7 @@ export function FilmHero() {
             <div className="mt-5 h-px w-32 bg-paper/15 sm:w-40" aria-hidden>
               <div
                 ref={progressRef}
-                className="h-px w-full origin-left bg-paper will-change-transform"
+                className="h-px w-full origin-left bg-brass will-change-transform"
                 style={{ transform: "scaleX(0)" }}
               />
             </div>

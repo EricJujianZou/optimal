@@ -115,6 +115,14 @@ export type NewSession = z.infer<typeof NewSessionSchema>;
 // /api/decide — general life decisions
 // ─────────────────────────────────────────────────────────────────────────
 
+export const AmendIntentSchema = z.enum([
+  "push_back",
+  "add_fact",
+  "go_deeper",
+]);
+
+export type AmendIntent = z.infer<typeof AmendIntentSchema>;
+
 export const DecidePayloadSchema = z
   .object({
     audioBase64: z.string().min(1).optional(),
@@ -123,6 +131,8 @@ export const DecidePayloadSchema = z
     history: z.array(HistoryTurnSchema).default([]),
     lat: z.number().min(-90).max(90).optional(),
     lon: z.number().min(-180).max(180).optional(),
+    /** How the user wants to amend the last call — shapes synthesis, not playbooks. */
+    amendIntent: AmendIntentSchema.optional(),
   })
   .refine(
     (v) =>
@@ -199,7 +209,10 @@ export const DecideResultSchema = z.object({
 
 export type DecideResult = z.infer<typeof DecideResultSchema>;
 
-/** Public API response. confidence/evaluation omitted so clients cannot display them. */
+/** Public density signal — derived from confidence & context; never show raw %. */
+export type DecideWeight = "everyday" | "heavy";
+
+/** Public API response. Raw confidence/evaluation omitted from client display. */
 export interface DecideResponse {
   status: "clarify" | "decide";
   transcript: string;
@@ -217,6 +230,10 @@ export interface DecideResponse {
   decisionId: number | null;
   /** DuckDuckGo snippets used for this answer (titles only for UI). */
   sources?: { title: string }[];
+  /** Adaptive UI density — everyday compact, heavy expanded. */
+  weight: DecideWeight;
+  /** Short labels from lasting profile/prefs used for this call. */
+  memory_hints: string[];
 }
 
 export interface ProfileRow {

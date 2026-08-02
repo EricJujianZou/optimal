@@ -529,6 +529,7 @@ export async function decide(args: {
   lat?: number;
   lon?: number;
   prefsBlock?: string;
+  amendIntent?: "push_back" | "add_fact" | "go_deeper";
   onProgress?: (e: DecideProgressEvent) => void;
 }): Promise<DecideOutcome> {
   const t0 = Date.now();
@@ -566,6 +567,7 @@ export async function decide(args: {
         hasAudio: Boolean(args.transcriptHint && !args.textSituation),
         factsJson: prefetch.factsJson,
         intent: prefetch.intent,
+        amendIntent: args.amendIntent,
       }),
     },
   ];

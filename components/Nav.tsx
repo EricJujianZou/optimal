@@ -7,7 +7,7 @@ export function Nav() {
       >
         <a
           href="/decide"
-          className="min-h-10 inline-flex items-center text-sm font-medium text-paper transition-colors hover:text-paper/80"
+          className="min-h-10 inline-flex items-center text-sm font-semibold text-paper transition-colors hover:text-brass"
         >
           Try it
         </a>

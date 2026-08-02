@@ -187,6 +187,7 @@ export async function decide(args: {
   lat?: number;
   lon?: number;
   prefsBlock?: string;
+  amendIntent?: "push_back" | "add_fact" | "go_deeper";
   onProgress?: Parameters<typeof openRouterDecide>[0]["onProgress"];
 }): Promise<DecideOutcome> {
   let textSituation = args.textSituation?.trim() || undefined;
@@ -224,6 +225,7 @@ export async function decide(args: {
     lat: args.lat,
     lon: args.lon,
     prefsBlock: args.prefsBlock,
+    amendIntent: args.amendIntent,
     onProgress: args.onProgress,
   });
 }
