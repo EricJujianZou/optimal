@@ -131,6 +131,7 @@ export default function DecidePage() {
   const [amendIntent, setAmendIntent] = useState<AmendIntent | null>(null);
   const [leanToward, setLeanToward] = useState<string | null>(null);
   const [interruptSpeak, setInterruptSpeak] = useState(0);
+  const [canRetry, setCanRetry] = useState(false);
   const resultTopRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const lastPayloadRef = useRef<DecidePayload | null>(null);
@@ -170,6 +171,7 @@ export default function DecidePage() {
     const ac = new AbortController();
     abortRef.current = ac;
     lastPayloadRef.current = payload;
+    setCanRetry(true);
     stageBeforeSubmitRef.current = stage;
     sawPartialRef.current = false;
     if (result?.status === "decide" && result.recommendation) {
@@ -398,6 +400,7 @@ export default function DecidePage() {
     leanTowardRef.current = null;
     settledResultRef.current = null;
     lastPayloadRef.current = null;
+    setCanRetry(false);
     setStage("input");
   }
 
@@ -484,7 +487,7 @@ export default function DecidePage() {
           <div className="mb-8">
             <ErrorBanner
               message={error}
-              canRetry={Boolean(lastPayloadRef.current)}
+              canRetry={canRetry}
               onRetry={() => {
                 const p = lastPayloadRef.current;
                 if (p) void submit(p);

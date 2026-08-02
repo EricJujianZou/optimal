@@ -40,6 +40,7 @@ export default function VerdictSheet({
   const [autoplayMuted, setAutoplayMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [whyExpanded, setWhyExpanded] = useState(false);
+  const [seenInterrupt, setSeenInterrupt] = useState(0);
   const lastSpokenId = useRef<number | null>(null);
 
   const speakText = spokenLine(result);
@@ -53,6 +54,11 @@ export default function VerdictSheet({
       ? `${why.slice(0, 157).trim()}…`
       : why;
   const memoryHints = (result.memory_hints || []).filter((h) => h.trim());
+
+  if (interruptSpeak > seenInterrupt) {
+    setSeenInterrupt(interruptSpeak);
+    if (speaking) setSpeaking(false);
+  }
 
   function setSpeakingState(next: boolean) {
     setSpeaking(next);
@@ -85,8 +91,9 @@ export default function VerdictSheet({
   }, [speaking, onSpeakingChange]);
 
   useEffect(() => {
-    if (interruptSpeak > 0) stopSpeak();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- interrupt signal only
+    if (interruptSpeak <= 0) return;
+    playbackRef.current?.stop();
+    playbackRef.current = null;
   }, [interruptSpeak]);
 
   useEffect(() => {
